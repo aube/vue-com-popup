@@ -54,7 +54,7 @@ export default {
             type: Function,
             default: null
         },
-        fullScreenMaxWidth: {
+        smallDeviceWidth: {
             type: Number,
             default: 768
         },
@@ -107,7 +107,7 @@ export default {
             this.isOpen = true;
             this.onOpen && this.onOpen();
             if (!isServer) {
-                this.isFullScreen = window.innerWidth <= this.fullScreenMaxWidth;
+                this.isFullScreen = window.innerWidth <= this.smallDeviceWidth;
                 document.documentElement.classList.add('popup-opened');
             }
         },
