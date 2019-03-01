@@ -1,10 +1,22 @@
 <template>
     <transition name="fade">
-        <div v-if="isOpen" class="com-popup" :class="{'open': isOpen, 'small-device': isFullScreen}">
+        <div
+            v-if="isOpen"
+            class="com-popup"
+            :class="{'open': isOpen, 'small-device': isSmallDevice}"
+            ref="popup-overlay"
+            @click.stop="clickOnOverlay">
             <div class="com-popup__container">
                 <div class="com-popup__container-cell">
-                    <div class="com-popup__closer" v-if="!hideCloseIcon"></div>
-                    <div class="com-popup__content" ref="popup-content" :style="{'max-width': maxWidth}">
+                    <div
+                        class="com-popup__closer"
+                        v-if="!hideCloseIcon"
+                        @click.stop="closePopup"></div>
+                    <div
+                        class="com-popup__content"
+                        ref="popup-content"
+                        :style="{'max-width': maxWidth}"
+                        @click.stop="clickOnContent">
                         <slot></slot>
                     </div>
                 </div>
@@ -23,9 +35,8 @@ export default {
     data() {
         return {
             isOpen: false,
-            isFullScreen: false,
+            isSmallDevice: false,
             eventKeyupHandler: null,
-            eventMousedownHandler: null
         };
     },
 
@@ -41,6 +52,14 @@ export default {
         closeByClickOnContent: {
             type: Boolean,
             default: false
+        },
+        closeByClickOnOverlay: {
+            type: Boolean,
+            default: true
+        },
+        closeOnEvent: {
+            type: String,
+            default: 'close'
         },
         hideCloseIcon: {
             type: Boolean,
@@ -71,19 +90,13 @@ export default {
     },
 
     methods: {
-        closeOnClick(event) {
-            if (!this.isOpen) {
-                return;
-            }
-            if (!this.closeByClickOnContent && !this.isFullScreen) {
-                let path = event.path || (event.composedPath && event.composedPath());
-                for (let i = 0; i < path.length; i++) {
-                    if (path[i] === this.$refs['popup-content']) {
-                        return;
-                    }
-                }
-            }
-            this.closePopup();
+
+        clickOnContent() {
+            this.closeByClickOnContent && this.closePopup();
+        },
+
+        clickOnOverlay() {
+            this.closeByClickOnOverlay && this.closePopup();
         },
 
         closeOnKey(event) {
@@ -107,31 +120,31 @@ export default {
             this.isOpen = true;
             this.onOpen && this.onOpen();
             if (!isServer) {
-                this.isFullScreen = window.innerWidth <= this.smallDeviceWidth;
+                this.isSmallDevice = window.innerWidth <= this.smallDeviceWidth;
                 document.documentElement.classList.add('popup-opened');
             }
         },
 
         togglePopup() {
             this.isOpen ? this.closePopup() : this.openPopup();
-        }
+        },
     },
 
     created() {
         this.isOpen = this.trigger;
         if (!isServer) {
-            this.eventMousedownHandler = document.addEventListener('mousedown', this.closeOnClick);
             this.eventKeyupHandler = document.addEventListener('keyup', this.closeOnKey);
             this.$bus.$on('toggle-popup-' + this.name, this.togglePopup);
+            this.$on(this.closeOnEvent, this.closePopup);
         }
     },
 
     destroyed() {
         if (!isServer) {
-            document.removeEventListener('click', this.eventMousedownHandler);
             document.removeEventListener('keyup', this.eventKeyupHandler);
 
             this.$bus.$off('toggle-popup-' + this.name);
+            this.$off(this.closeOnEvent);
         }
     }
 };
@@ -233,7 +246,7 @@ html.popup-opened {
 .fade-enter-active, .fade-leave-active {
     transition: opacity .5s;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+.fade-enter, .fade-leave-to {
     opacity: 0;
 }
 

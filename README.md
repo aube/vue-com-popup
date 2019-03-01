@@ -12,11 +12,14 @@ $ npm i vue-com-popup
 | name                  | For using with event bus (Vue.prototype.$bus)                    | String                 | ''       |
 | trigger               | Open/Close popup                                                 | Boolean                | false    |
 | closeByClickOnContent | Close popup after click inside                                   | Boolean                | false    |
+| closeByClickOnOverlay | Close popup after click outside                                  | Boolean                | false    |
+| closeOnEvent          | Listen event from content (Use this.$parent.$emit in child)      | String                 | 'close'  |
 | hideCloseIcon         | Thank you, Captain!                                              | Boolean                | false    |
 | smallDeviceWidth      | Full screen mode for devices smaller this                        | Number                 | 768      |
 | maxWidth              | max-with CSS value                                               | String                 | ''       |
 | onOpen                | Callback for open event                                          | Function               | null     |
 | onClose               | Callback for close event                                         | Function               | null     |
+
 
 
 # Example

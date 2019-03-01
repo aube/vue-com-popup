@@ -14,6 +14,18 @@
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 var isServer = typeof window === 'undefined';
@@ -23,9 +35,8 @@ var script = {
     data: function data() {
         return {
             isOpen: false,
-            isFullScreen: false,
+            isSmallDevice: false,
             eventKeyupHandler: null,
-            eventMousedownHandler: null
         };
     },
 
@@ -42,6 +53,14 @@ var script = {
             type: Boolean,
             default: false
         },
+        closeByClickOnOverlay: {
+            type: Boolean,
+            default: true
+        },
+        closeOnEvent: {
+            type: String,
+            default: 'close'
+        },
         hideCloseIcon: {
             type: Boolean,
             default: false
@@ -54,7 +73,7 @@ var script = {
             type: Function,
             default: null
         },
-        fullScreenMaxWidth: {
+        smallDeviceWidth: {
             type: Number,
             default: 768
         },
@@ -71,19 +90,13 @@ var script = {
     },
 
     methods: {
-        closeOnClick: function closeOnClick(event) {
-            if (!this.isOpen) {
-                return;
-            }
-            if (!this.closeByClickOnContent && !this.isFullScreen) {
-                var path = event.path || (event.composedPath && event.composedPath());
-                for (var i = 0; i < path.length; i++) {
-                    if (path[i] === this.$refs['popup-content']) {
-                        return;
-                    }
-                }
-            }
-            this.closePopup();
+
+        clickOnContent: function clickOnContent() {
+            this.closeByClickOnContent && this.closePopup();
+        },
+
+        clickOnOverlay: function clickOnOverlay() {
+            this.closeByClickOnOverlay && this.closePopup();
         },
 
         closeOnKey: function closeOnKey(event) {
@@ -107,31 +120,31 @@ var script = {
             this.isOpen = true;
             this.onOpen && this.onOpen();
             if (!isServer) {
-                this.isFullScreen = window.innerWidth <= this.fullScreenMaxWidth;
+                this.isSmallDevice = window.innerWidth <= this.smallDeviceWidth;
                 document.documentElement.classList.add('popup-opened');
             }
         },
 
         togglePopup: function togglePopup() {
             this.isOpen ? this.closePopup() : this.openPopup();
-        }
+        },
     },
 
     created: function created() {
         this.isOpen = this.trigger;
         if (!isServer) {
-            this.eventMousedownHandler = document.addEventListener('mousedown', this.closeOnClick);
             this.eventKeyupHandler = document.addEventListener('keyup', this.closeOnKey);
             this.$bus.$on('toggle-popup-' + this.name, this.togglePopup);
+            this.$on(this.closeOnEvent, this.closePopup);
         }
     },
 
     destroyed: function destroyed() {
         if (!isServer) {
-            document.removeEventListener('click', this.eventMousedownHandler);
             document.removeEventListener('keyup', this.eventKeyupHandler);
 
             this.$bus.$off('toggle-popup-' + this.name);
+            this.$off(this.closeOnEvent);
         }
     }
 };
@@ -275,13 +288,13 @@ var browser = createInjector;
 var __vue_script__ = script;
 
 /* template */
-var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('transition',{attrs:{"name":"fade"}},[(_vm.isOpen)?_c('div',{staticClass:"com-popup",class:{'open': _vm.isOpen, 'small-device': _vm.isFullScreen}},[_c('div',{staticClass:"com-popup__container"},[_c('div',{staticClass:"com-popup__container-cell"},[(!_vm.hideCloseIcon)?_c('div',{staticClass:"com-popup__closer"}):_vm._e(),_vm._v(" "),_c('div',{ref:"popup-content",staticClass:"com-popup__content",style:({'max-width': _vm.maxWidth})},[_vm._t("default")],2)])])]):_vm._e()])};
+var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('transition',{attrs:{"name":"fade"}},[(_vm.isOpen)?_c('div',{ref:"popup-overlay",staticClass:"com-popup",class:{'open': _vm.isOpen, 'small-device': _vm.isSmallDevice},on:{"click":function($event){$event.stopPropagation();return _vm.clickOnOverlay($event)}}},[_c('div',{staticClass:"com-popup__container"},[_c('div',{staticClass:"com-popup__container-cell"},[(!_vm.hideCloseIcon)?_c('div',{staticClass:"com-popup__closer",on:{"click":function($event){$event.stopPropagation();return _vm.closePopup($event)}}}):_vm._e(),_vm._v(" "),_c('div',{ref:"popup-content",staticClass:"com-popup__content",style:({'max-width': _vm.maxWidth}),on:{"click":function($event){$event.stopPropagation();return _vm.clickOnContent($event)}}},[_vm._t("default")],2)])])]):_vm._e()])};
 var __vue_staticRenderFns__ = [];
 
   /* style */
   var __vue_inject_styles__ = function (inject) {
     if (!inject) { return }
-    inject("data-v-3260603f_0", { source: ".com-popup{top:0;left:0;width:100%;height:100%;position:fixed;z-index:10000;overflow:hidden;overflow-x:hidden;overflow-y:auto;background:rgba(0,0,0,.5)}.com-popup.hidden{display:none}.com-popup__container{min-height:100%;position:relative;display:table;text-align:center;overflow:hidden;width:100%}.com-popup__container-cell{display:table-cell;vertical-align:middle}.com-popup__content{background:#fff;display:inline-block;position:relative;margin:5%;max-width:1200px;padding:0;overflow:hidden}.com-popup__closer{position:fixed;top:20px;right:20px;width:40px;height:40px;opacity:.5;cursor:pointer;z-index:10}.com-popup__closer:hover{opacity:1}.com-popup__closer:after,.com-popup__closer:before{position:absolute;left:14px;content:\" \";height:100%;width:2px;background-color:#fff;box-shadow:0 0 1px #333}.com-popup__closer:before{transform:rotate(45deg)}.com-popup__closer:after{transform:rotate(-45deg)}.small-device .com-popup{height:100%}.small-device .com-popup__content{width:98%;margin:1%}.small-device .com-popup__container{height:100%}.small-device .com-popup__container-cell{vertical-align:top}.small-device .com-popup__closer{display:none}html.popup-opened{overflow:hidden}.fade-enter-active,.fade-leave-active{transition:opacity .5s}.fade-enter,.fade-leave-to{opacity:0}", map: undefined, media: undefined });
+    inject("data-v-9dce3d3c_0", { source: ".com-popup{top:0;left:0;width:100%;height:100%;position:fixed;z-index:10000;overflow:hidden;overflow-x:hidden;overflow-y:auto;background:rgba(0,0,0,.5)}.com-popup.hidden{display:none}.com-popup__container{min-height:100%;position:relative;display:table;text-align:center;overflow:hidden;width:100%}.com-popup__container-cell{display:table-cell;vertical-align:middle}.com-popup__content{background:#fff;display:inline-block;position:relative;margin:5%;max-width:1200px;padding:0;overflow:hidden}.com-popup__closer{position:fixed;top:20px;right:20px;width:40px;height:40px;opacity:.5;cursor:pointer;z-index:10}.com-popup__closer:hover{opacity:1}.com-popup__closer:after,.com-popup__closer:before{position:absolute;left:14px;content:\" \";height:100%;width:2px;background-color:#fff;box-shadow:0 0 1px #333}.com-popup__closer:before{transform:rotate(45deg)}.com-popup__closer:after{transform:rotate(-45deg)}.small-device .com-popup{height:100%}.small-device .com-popup__content{width:98%;margin:1%}.small-device .com-popup__container{height:100%}.small-device .com-popup__container-cell{vertical-align:top}.small-device .com-popup__closer{display:none}html.popup-opened{overflow:hidden}.fade-enter-active,.fade-leave-active{transition:opacity .5s}.fade-enter,.fade-leave-to{opacity:0}", map: undefined, media: undefined });
 
   };
   /* scoped */
