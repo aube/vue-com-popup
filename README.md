@@ -16,7 +16,7 @@ $ npm i vue-com-popup
 | closeOnEvent          | Listen event from content (Use this.$parent.$emit in child)      | String                 | 'close'  |
 | hideCloseIcon         | Thank you, Captain!                                              | Boolean                | false    |
 | smallDeviceWidth      | Full screen mode for devices smaller this                        | Number                 | 768      |
-| maxWidth              | max-with CSS value                                               | String                 | ''       |
+| inlineStyle           | Popup CSS                                                        | Object                 | null     |
 | onOpen                | Callback for open event                                          | Function               | null     |
 | onClose               | Callback for close event                                         | Function               | null     |
 
@@ -26,13 +26,16 @@ $ npm i vue-com-popup
 Using vue-com-popup inside another vue component:
 ```html
 <template>
-    <div class="image-container">
-        <img
-            :src="thumbnail"
-            @click="popupState=!popupState"
-            class="thumbnail">
-        <com-popup :trigger="popupState">
-            <img :src="src" class="full-image">
+    <div>
+        <button @click="popupState =! popupState">Popup trigger</button>
+        <com-popup
+            :trigger="popupState"
+            :inline-style="{
+                'min-width': '30%',
+                'padding': '20px'
+            }">
+            <h1>Popup tittle</h1>
+            <p>Popup content</p>
         </com-popup>
     </div>
 </template>
@@ -52,25 +55,6 @@ export default {
         };
     },
 
-    props: {
-        suffix: {
-            type: String,
-            default: '-xs'
-        },
-        src: {
-            type: String,
-            default: ''
-        },
-    },
-
-    computed: {
-        thumbnail: function() {
-            if (this.suffix) {
-                return this.src.replace(/^(.*)\.(.{3,4})/i, '$1' + this.suffix + '.$2');
-            }
-            return this.src;
-        }
-    },
 };
 </script>
 ```

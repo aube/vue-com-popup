@@ -14,8 +14,7 @@
                         @click.stop="closePopup"></div>
                     <div
                         class="com-popup__content"
-                        ref="popup-content"
-                        :style="{'max-width': maxWidth}"
+                        :style="inlineStyle"
                         @click.stop="clickOnContent">
                         <slot></slot>
                     </div>
@@ -77,14 +76,14 @@ export default {
             type: Number,
             default: 768
         },
-        maxWidth: {
-            type: String,
+        inlineStyle: {
+            type: Object,
             default: null
         },
     },
 
     watch: {
-        trigger(val) {
+        trigger() {
             this.togglePopup();
         },
     },
@@ -134,7 +133,6 @@ export default {
         this.isOpen = this.trigger;
         if (!isServer) {
             this.eventKeyupHandler = document.addEventListener('keyup', this.closeOnKey);
-            this.$bus.$on('toggle-popup-' + this.name, this.togglePopup);
             this.$on(this.closeOnEvent, this.closePopup);
         }
     },
@@ -142,8 +140,6 @@ export default {
     destroyed() {
         if (!isServer) {
             document.removeEventListener('keyup', this.eventKeyupHandler);
-
-            this.$bus.$off('toggle-popup-' + this.name);
             this.$off(this.closeOnEvent);
         }
     }
